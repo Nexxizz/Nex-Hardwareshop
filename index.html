@@ -22,10 +22,23 @@
 <canvas id="scene" aria-hidden="true"></canvas>
 <div class="vignette" aria-hidden="true"></div>
 
+<div class="loader" id="loader" aria-hidden="true">
+  <div class="loader-inner">
+    <div class="loader-mark">NEX</div>
+    <div class="loader-bar"><span id="loader-fill"></span></div>
+    <p class="loader-text" id="loader-text">Laden wird aufgebaut …</p>
+  </div>
+</div>
+
 <header class="topbar">
   <div class="brand">NEX<span>Hardwareshop</span></div>
   <div class="where" aria-live="polite"><span id="where">Vor dem Laden</span></div>
 </header>
+
+<nav class="progress" aria-label="Stationen des Rundgangs">
+  <div class="progress-track" aria-hidden="true"><span id="progress-fill"></span></div>
+  <ol id="progress-list"></ol>
+</nav>
 
 <main id="tour">
   <section class="panel hero" id="ov-hero">
@@ -77,6 +90,13 @@
     <p>Kopfhörer, Controller, Tastaturen, Mäuse und Ladegeräte für alle Geräte im Laden.</p>
     <div class="chips" data-chips="accessories"></div>
     <p class="hint" data-hint></p>
+  </section>
+
+  <section class="panel card later left" id="ov-outro">
+    <p class="eyebrow">Überblick</p>
+    <h2>Schön, dass du da warst.</h2>
+    <p>Smartphones, Tablets, PCs und Zubehör unter einem Dach. Komm vorbei und probier alles selbst aus.</p>
+    <button class="cta" id="to-top" type="button">Zurück zum Anfang</button>
   </section>
 </main>
 

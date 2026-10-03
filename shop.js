@@ -190,7 +190,10 @@ export function buildShop({ isMobile, shadows }) {
   const roomD = 22;
   const floor = mesh(new THREE.PlaneGeometry(roomW, roomD), M.floor, 0, 0.001, -roomD / 2, root);
   floor.rotation.x = -Math.PI / 2;
-  const ceil = mesh(new THREE.PlaneGeometry(roomW, roomD), M.ceiling, 0, 4.4, -roomD / 2, root);
+  // Decke und Deckenlampen in einer Gruppe, damit sie beim Blick von oben ausgeblendet werden können
+  const ceiling = new THREE.Group();
+  root.add(ceiling);
+  const ceil = mesh(new THREE.PlaneGeometry(roomW, roomD), M.ceiling, 0, 4.4, -roomD / 2, ceiling);
   ceil.rotation.x = Math.PI / 2;
   const wl = mesh(new THREE.PlaneGeometry(roomD, 4.4), M.wall, -roomW / 2, 2.2, -roomD / 2, root);
   wl.rotation.y = Math.PI / 2;
@@ -203,8 +206,15 @@ export function buildShop({ isMobile, shadows }) {
 
   // Lichtbänder an der Decke und am Boden
   const strip = glow(0xf2f8ff, 1.0);
-  for (const x of [-3.6, 0, 3.6]) box(0.12, 0.03, 18.5, strip, x, 4.37, -11.5, root);
-  for (const z of [-4, -10, -16]) box(7.3, 0.03, 0.1, strip, 0, 4.37, z, root);
+  for (const x of [-3.6, 0, 3.6]) box(0.12, 0.03, 18.5, strip, x, 4.37, -11.5, ceiling);
+  for (const z of [-4, -10, -16]) box(7.3, 0.03, 0.1, strip, 0, 4.37, z, ceiling);
+
+  // Mauerkronen und Boden rundherum: sichtbar, wenn die Kamera am Ende über den Laden fährt
+  box(0.3, 0.1, roomD + 0.3, M.pillar, -roomW / 2 - 0.1, 4.45, -roomD / 2, root);
+  box(0.3, 0.1, roomD + 0.3, M.pillar, roomW / 2 + 0.1, 4.45, -roomD / 2, root);
+  box(roomW + 0.5, 0.1, 0.3, M.pillar, 0, 4.45, -roomD - 0.1, root);
+  const yard = mesh(new THREE.PlaneGeometry(120, 80), M.road, 0, -0.16, -40, root);
+  yard.rotation.x = -Math.PI / 2;
   const floorLed = glow(NEON, 1.3);
   box(0.03, 0.03, roomD - 1, floorLed, -roomW / 2 + 0.03, 0.04, -roomD / 2 - 0.5, root);
   box(0.03, 0.03, roomD - 1, floorLed, roomW / 2 - 0.03, 0.04, -roomD / 2 - 0.5, root);
@@ -419,6 +429,7 @@ export function buildShop({ isMobile, shadows }) {
 
   function update(t, dt, state, reducedMotion) {
     setDoor(state.door);
+    ceiling.visible = state.overview < 0.12;
 
     let on = 1;
     if (!reducedMotion && t < 1.2) {

@@ -51,6 +51,18 @@ function skyTexture() {
   return tex;
 }
 
+// Ladebildschirm: Fortschritt in groben Schritten, bis das erste Bild gerendert ist
+const loaderEl = document.getElementById('loader');
+const loaderFill = document.getElementById('loader-fill');
+const loaderText = document.getElementById('loader-text');
+const nextFrame = () => new Promise((resolve) => requestAnimationFrame(() => resolve()));
+
+async function loading(progress, text) {
+  loaderFill.style.setProperty('--p', progress);
+  if (text) loaderText.textContent = text;
+  await nextFrame();
+}
+
 async function init() {
   const renderer = createRenderer();
   if (!renderer) {
@@ -58,7 +70,9 @@ async function init() {
     return;
   }
 
+  await loading(0.25, 'Schriften werden geladen …');
   await fontsReady();
+  await loading(0.5, 'Laden wird eingerichtet …');
 
   const pixelRatio = Math.min(devicePixelRatio, isMobile ? 1.5 : 2);
   renderer.setPixelRatio(pixelRatio);
@@ -80,6 +94,7 @@ async function init() {
 
   const shop = buildShop({ isMobile, shadows });
   scene.add(shop.root);
+  await loading(0.8, 'Licht wird eingeschaltet …');
 
   const target = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: isMobile ? 2 : 4 });
   const composer = new EffectComposer(renderer, target);
@@ -95,6 +110,7 @@ async function init() {
     door: 0,
     away: 1,
     shift: 0,
+    overview: 0,
   };
 
   let portrait = false;
@@ -135,6 +151,7 @@ async function init() {
 
   const look = new THREE.Vector3();
   const back = new THREE.Vector3();
+  const up = new THREE.Vector3(0, 1, 0);
   const clock = new THREE.Clock();
   let first = true;
 
@@ -157,10 +174,20 @@ async function init() {
     const center = portrait ? 1.2 * state.away : 0;
     look.set(state.look.x + center + pointer.sx * 0.5 * sway, state.look.y + pointer.sy * 0.2 * sway + extra * 0.08, state.look.z);
 
-    // Im Hochformat tritt die Kamera im Laden einen Schritt zurück, damit die ganze Zone ins Bild passt
+    // Am Ende kreist die Kamera langsam über dem Laden
+    if (state.overview > 0 && !reducedMotion) {
+      back.subVectors(camera.position, look);
+      back.applyAxisAngle(up, state.overview * Math.sin(t * 0.12) * 0.22);
+      camera.position.addVectors(look, back);
+    }
+
     if (portrait) {
-      back.subVectors(camera.position, look).normalize().multiplyScalar(2.6 * (1 - state.away));
+      // Im Hochformat tritt die Kamera im Laden einen Schritt zurück, damit die ganze Zone ins Bild passt
+      back.subVectors(camera.position, look).normalize().multiplyScalar(2.6 * (1 - state.away) * (1 - state.overview));
       back.y = 0;
+      camera.position.add(back);
+      // und fährt beim Überblick höher, damit der ganze Laden ins schmale Bild passt
+      back.subVectors(camera.position, look).multiplyScalar(0.7 * state.overview);
       camera.position.add(back);
     }
     camera.lookAt(look);
@@ -183,6 +210,7 @@ async function init() {
     if (first) {
       first = false;
       canvas.classList.add('ready');
+      loading(1, 'Fertig').then(() => loaderEl.classList.add('done'));
     }
     requestAnimationFrame(frame);
   }
