@@ -47,12 +47,46 @@
     <p>Vorne Smartphones und Tablets, hinten PCs, Laptops und Zubehör. Jedes Gerät liegt zum Ausprobieren bereit.</p>
   </section>
 
-  <section class="panel card later right" id="ov-next">
-    <p class="eyebrow">Nächster Halt · Smartphone-Zone</p>
-    <h2>Hier geht es bald weiter.</h2>
-    <p>Im nächsten Schritt kommen die Bereiche für Smartphones, Tablets, PCs und Zubehör dazu.</p>
+  <section class="panel card later left zone" id="ov-phones">
+    <p class="eyebrow">Smartphone-Zone</p>
+    <h2>Die Smartphones, die gerade alle wollen.</h2>
+    <p>Vom Flaggschiff bis zum Foldable. Alle Geräte sind eingeschaltet und bereit zum Ausprobieren.</p>
+    <div class="chips" data-chips="smartphones"></div>
+    <p class="hint" data-hint></p>
+  </section>
+
+  <section class="panel card later left zone" id="ov-tablets">
+    <p class="eyebrow">Tablet-Zone</p>
+    <h2>Groß genug für Arbeit und Serien.</h2>
+    <p>Vom robusten Einsteiger-Tablet bis zum Profi-Gerät mit Stift.</p>
+    <div class="chips" data-chips="tablets"></div>
+    <p class="hint" data-hint></p>
+  </section>
+
+  <section class="panel card later left zone" id="ov-pcs">
+    <p class="eyebrow">PC- &amp; Gaming-Zone</p>
+    <h2>Vom Büro bis zum Gaming-Setup.</h2>
+    <p>Gaming-PC, Monitor und Laptop zum Anspielen, dazu ein leiser PC fürs Büro.</p>
+    <div class="chips" data-chips="pcs"></div>
+    <p class="hint" data-hint></p>
+  </section>
+
+  <section class="panel card later left zone" id="ov-accessories">
+    <p class="eyebrow">Zubehör</p>
+    <h2>Das passende Extra.</h2>
+    <p>Kopfhörer, Controller, Tastaturen, Mäuse und Ladegeräte für alle Geräte im Laden.</p>
+    <div class="chips" data-chips="accessories"></div>
+    <p class="hint" data-hint></p>
   </section>
 </main>
+
+<aside class="info" id="info" hidden aria-live="polite">
+  <button class="info-close" id="info-close" type="button" aria-label="Info-Karte schließen">×</button>
+  <p class="eyebrow" id="info-zone"></p>
+  <h3 id="info-name"></h3>
+  <p class="info-tag" id="info-tag"></p>
+  <ul class="info-specs" id="info-specs"></ul>
+</aside>
 
 <div id="fallback">
   <p class="eyebrow">Nex Hardwareshop</p>

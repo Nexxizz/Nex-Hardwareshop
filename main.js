@@ -7,6 +7,7 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { buildShop } from './shop.js';
 import { setupScroll } from './scroll.js';
+import { setupInteraction } from './interaction.js';
 
 const canvas = document.getElementById('scene');
 const whereEl = document.getElementById('where');
@@ -93,10 +94,13 @@ async function init() {
     look: { x: -1.2, y: 2.4, z: 0 },
     door: 0,
     away: 1,
+    shift: 0,
   };
 
   let portrait = false;
+  let viewShift = NaN;
   function resize() {
+    viewShift = NaN;
     const w = innerWidth;
     const h = innerHeight;
     portrait = w / h < 0.9;
@@ -119,13 +123,18 @@ async function init() {
     });
   }
 
+  const isTouch = matchMedia('(hover: none)').matches;
+  const interaction = setupInteraction({ camera, products: shop.products, isTouch, reducedMotion });
+
   setupScroll({
     state,
     reducedMotion,
     onLocation: (label) => { whereEl.textContent = label; },
+    onZone: (zone) => interaction.setZone(zone),
   });
 
   const look = new THREE.Vector3();
+  const back = new THREE.Vector3();
   const clock = new THREE.Clock();
   let first = true;
 
@@ -138,16 +147,37 @@ async function init() {
 
     // Im Hochformat steht die Kamera draußen weiter weg und mittig, damit die Fassade ins Bild passt
     const extra = portrait ? 8 * state.away : 0;
+    // Im Laden wirkt die Maus-Parallaxe schwächer, damit die Geräte beim Zeigen ruhig bleiben
+    const sway = 0.35 + 0.65 * state.away;
     camera.position.set(
-      state.cam.x + pointer.sx * 0.3,
-      state.cam.y + pointer.sy * 0.12 + extra * 0.12,
+      state.cam.x + pointer.sx * 0.3 * sway,
+      state.cam.y + pointer.sy * 0.12 * sway + extra * 0.12,
       state.cam.z + extra,
     );
     const center = portrait ? 1.2 * state.away : 0;
-    look.set(state.look.x + center + pointer.sx * 0.5, state.look.y + pointer.sy * 0.2 + extra * 0.08, state.look.z);
+    look.set(state.look.x + center + pointer.sx * 0.5 * sway, state.look.y + pointer.sy * 0.2 * sway + extra * 0.08, state.look.z);
+
+    // Im Hochformat tritt die Kamera im Laden einen Schritt zurück, damit die ganze Zone ins Bild passt
+    if (portrait) {
+      back.subVectors(camera.position, look).normalize().multiplyScalar(2.6 * (1 - state.away));
+      back.y = 0;
+      camera.position.add(back);
+    }
     camera.lookAt(look);
+    camera.updateMatrixWorld();
+
+    // Bild seitlich verschieben (nur Querformat), damit die Texttafeln links nichts verdecken
+    const shift = portrait ? 0 : state.shift;
+    if (shift !== viewShift) {
+      viewShift = shift;
+      const w = innerWidth;
+      const h = innerHeight;
+      if (shift) camera.setViewOffset(w, h, -shift * w, 0, w, h);
+      else camera.clearViewOffset();
+    }
 
     shop.update(t, dt, state, reducedMotion);
+    interaction.update(dt);
     composer.render();
 
     if (first) {

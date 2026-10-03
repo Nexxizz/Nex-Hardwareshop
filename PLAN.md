@@ -34,8 +34,10 @@ Geplante Dateistruktur:
 index.html      – Seitengerüst, Text-Overlays, Scroll-Abschnitte
 style.css       – Typografie, Overlays, Info-Karten, responsive Anpassungen
 main.js         – Szene, Kamera, Licht, Render-Loop
-shop.js         – Aufbau des Ladens (Fassade, Raum, Theken, Regale, Geräte)
+shop.js         – Aufbau des Ladens (Straße, Fassade, Raum, Zonen)
+devices.js      – Materialien, Texturen und Gerätemodelle (Smartphones, Tablets, PCs, Zubehör)
 scroll.js       – Kamerapfad und Scroll-Steuerung
+interaction.js  – Hover/Tippen, Info-Karten und Auswahl-Buttons
 products.js     – Produktdaten (Name, Kategorie, Kurzbeschreibung)
 ```
 
