@@ -46,6 +46,7 @@
     <h1>Technik, die du anfassen kannst.</h1>
     <p class="lead">Komm rein und schau dich um. Scrolle, um den Laden zu betreten.</p>
     <div class="cue" aria-hidden="true"><span class="cue-line"></span>Scrollen</div>
+    <button class="text-link" id="to-static" type="button">Lieber ohne 3D? Zur einfachen Ansicht</button>
   </section>
 
   <section class="panel card later right" id="ov-door">
@@ -108,14 +109,23 @@
   <ul class="info-specs" id="info-specs"></ul>
 </aside>
 
-<div id="fallback">
-  <p class="eyebrow">Nex Hardwareshop</p>
-  <h1>Technik, die du anfassen kannst.</h1>
-  <p>Dein Browser kann die 3D-Ansicht leider nicht anzeigen. Öffne die Seite in einem aktuellen Browser wie Chrome, Edge, Firefox oder Safari.</p>
+<div class="static" id="static" hidden>
+  <header class="static-hero">
+    <p class="eyebrow">PCs · Smartphones · Tablets · Zubehör</p>
+    <h1>Nex Hardwareshop</h1>
+    <p class="static-lead">Technik, die du anfassen kannst. Hier findest du alle Bereiche unseres Ladens auf einen Blick.</p>
+    <p class="static-note" id="static-note" hidden></p>
+    <button class="cta" id="static-3d" type="button" hidden>3D-Rundgang starten</button>
+  </header>
+  <div id="static-zones"></div>
 </div>
+
+<noscript>
+  <p class="noscript">Für den Rundgang durch den Nex Hardwareshop wird JavaScript benötigt. Bitte aktiviere JavaScript in deinem Browser.</p>
+</noscript>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script type="module" src="main.js"></script>
+<script type="module" src="boot.js"></script>
 </body>
 </html>

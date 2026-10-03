@@ -1,4 +1,4 @@
-// Einstieg: Renderer, Kamera, Nachleuchten (Bloom) und Render-Schleife.
+// 3D-Rundgang: Renderer, Kamera, Nachleuchten (Bloom) und Render-Schleife. Wird von boot.js gestartet.
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
@@ -15,7 +15,7 @@ const isMobile = matchMedia('(pointer: coarse)').matches || Math.min(innerWidth,
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // Rundgang beginnt beim Neuladen immer vor dem Laden
-if ("scrollRestoration" in history) history.scrollRestoration = "manual";
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 scrollTo(0, 0);
 
 function createRenderer() {
@@ -63,24 +63,24 @@ async function loading(progress, text) {
   await nextFrame();
 }
 
-async function init() {
+// Startet den Rundgang. Gibt null zurück, wenn WebGL fehlt, sonst eine Steuerung zum Pausieren und Fortsetzen.
+export async function start() {
   const renderer = createRenderer();
-  if (!renderer) {
-    document.documentElement.classList.add('no-webgl');
-    return;
-  }
+  if (!renderer) return null;
 
   await loading(0.25, 'Schriften werden geladen …');
   await fontsReady();
   await loading(0.5, 'Laden wird eingerichtet …');
 
-  const pixelRatio = Math.min(devicePixelRatio, isMobile ? 1.5 : 2);
+  let pixelRatio = Math.min(devicePixelRatio, isMobile ? 1.5 : 2);
   renderer.setPixelRatio(pixelRatio);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.85;
   const shadows = !isMobile;
   renderer.shadowMap.enabled = shadows;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  // Licht und Möbel stehen still: Schatten nur neu berechnen, wenn sich etwas Großes bewegt (Tür, Decke)
+  renderer.shadowMap.autoUpdate = false;
 
   const scene = new THREE.Scene();
   scene.background = skyTexture();
@@ -100,6 +100,7 @@ async function init() {
   const composer = new EffectComposer(renderer, target);
   composer.addPass(new RenderPass(scene, camera));
   const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.3, 0.4, 1.3);
+  bloom.enabled = !isMobile;
   composer.addPass(bloom);
   composer.addPass(new OutputPass());
 
@@ -142,7 +143,7 @@ async function init() {
   const isTouch = matchMedia('(hover: none)').matches;
   const interaction = setupInteraction({ camera, products: shop.products, isTouch, reducedMotion });
 
-  setupScroll({
+  const tl = setupScroll({
     state,
     reducedMotion,
     onLocation: (label) => { whereEl.textContent = label; },
@@ -155,9 +156,42 @@ async function init() {
   const clock = new THREE.Clock();
   let first = true;
 
+  // Läuft es dauerhaft unter ~40 Bildern pro Sekunde, sinkt die Qualität in zwei Stufen
+  const perf = { frames: 0, time: 0, level: 0 };
+  function degrade() {
+    perf.level += 1;
+    if (perf.level === 1) {
+      bloom.enabled = false;
+      pixelRatio = Math.max(1, pixelRatio * 0.75);
+    } else {
+      pixelRatio = 1;
+      if (renderer.shadowMap.enabled) {
+        renderer.shadowMap.enabled = false;
+        scene.traverse((o) => { if (o.material) o.material.needsUpdate = true; });
+      }
+    }
+    renderer.setPixelRatio(pixelRatio);
+    resize();
+  }
+
+  let running = true;
+  let shadowKey = '';
+
   function frame() {
-    const dt = Math.min(clock.getDelta(), 0.05);
+    if (!running) return;
+    const raw = clock.getDelta();
+    const dt = Math.min(raw, 0.05);
     const t = clock.elapsedTime;
+
+    if (perf.level < 2 && t > 2) {
+      perf.frames += 1;
+      perf.time += raw;
+      if (perf.frames >= 90) {
+        if (perf.time / perf.frames > 1 / 40) degrade();
+        perf.frames = 0;
+        perf.time = 0;
+      }
+    }
 
     pointer.sx += (pointer.x - pointer.sx) * Math.min(1, dt * 3);
     pointer.sy += (pointer.y - pointer.sy) * Math.min(1, dt * 3);
@@ -205,6 +239,12 @@ async function init() {
 
     shop.update(t, dt, state, reducedMotion);
     interaction.update(dt);
+
+    const key = `${state.door.toFixed(3)}|${state.overview > 0.12}`;
+    if (key !== shadowKey) {
+      shadowKey = key;
+      renderer.shadowMap.needsUpdate = true;
+    }
     composer.render();
 
     if (first) {
@@ -215,6 +255,20 @@ async function init() {
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
-}
 
-init();
+  return {
+    pause() {
+      running = false;
+      tl.scrollTrigger.disable();
+    },
+    resume() {
+      if (running) return;
+      running = true;
+      scrollTo(0, 0);
+      tl.scrollTrigger.enable();
+      window.ScrollTrigger.refresh();
+      clock.getDelta();
+      requestAnimationFrame(frame);
+    },
+  };
+}
