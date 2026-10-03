@@ -9,7 +9,7 @@ PCs, Smartphones und Tablets präsentiert.
 | Punkt | Entscheidung |
 |---|---|
 | Technik | Echte 3D-Szene (Ansatz A) mit Three.js |
-| Optik | Modern: dunkle Grundstimmung, Neon- und Akzentlicht, cleaner „Tech-Look“, stilisiert statt fotorealistisch |
+| Optik | Modern und stilisiert statt fotorealistisch; Szene **bei Tag** (Sonne mit Schatten, heller Himmel), helle Fassade mit dunkler Schrifttafel, Neon nur als Akzent |
 | Laden | Fiktiv, kein echtes Vorbild |
 | Produkte | Gängige, oft verkaufte Geräte: Smartphones, Tablets, PCs/Laptops, etwas Zubehör |
 | Kaufen | Nein, nur Präsentation (kein Warenkorb, keine Preise nötig) |
@@ -40,7 +40,7 @@ products.js     – Produktdaten (Name, Kategorie, Kurzbeschreibung)
 ```
 
 ## Ablauf beim Scrollen (Szenen)
-0. **Start (Hero)**: Außenansicht der Ladenfront bei Nacht, leuchtender Neon-Schriftzug
+0. **Start (Hero)**: Außenansicht der Ladenfront bei Tag, leuchtender Schriftzug
    „NEX HARDWARESHOP“, kurzer Slogan und der Hinweis „Scrollen zum Eintreten“.
 1. **Annäherung**: Die Kamera fährt auf die Glastür zu, die Tür gleitet auf.
 2. **Eingang**: Blick in den Laden mit Begrüßungstheke und Lichtleisten. Kurzer Text, was
